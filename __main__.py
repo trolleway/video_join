@@ -1,12 +1,6 @@
-"""
-Example program to demonstrate Gooey's presentation of subparsers
-"""
 
-import argparse,os
-
+import argparse, os
 from gooey import Gooey, GooeyParser
-from message import display_message
-
 import tempfile
 
 running = True
