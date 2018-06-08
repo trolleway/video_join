@@ -8,7 +8,7 @@ running = True
 
 @Gooey(optional_cols=2, program_name="concatenate videos")
 def main():
-  settings_msg = 'concatenate videos in FFMPEG whtiouth re-encoding' \
+  settings_msg = "Concatenate videos in FFMPEG whtiouth re-encoding \n" \
                  'New file will be saved to source folder'
   parser = GooeyParser(description=settings_msg)
   parser.add_argument('--verbose', help='be verbose', dest='verbose',
@@ -44,14 +44,11 @@ def main():
     text_file.write(ffmpeg_concatenate_list)
     text_file.close()
     
-    cmd = 'ffmpeg -y -safe 0 -f concat -i {tf} -c copy  -vcodec copy  {filename}'.format(tf=tf.name,filename=os.path.join(folder,FILENAME)+''+video_extension)
+    cmd = 'ffmpeg -y -safe 0 -f concat -i {tf} -c copy  -vcodec copy  "{filename}"'.format(tf=tf.name,filename=os.path.join(folder,FILENAME)+''+video_extension)
     print cmd
     os.system(cmd)
     
     #os.unlink(tf.name)
-
-
-
 
 if __name__ == '__main__':
   main()
