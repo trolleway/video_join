@@ -1,5 +1,6 @@
 
 import argparse, os
+import subprocess
 from gooey import Gooey, GooeyParser
 import tempfile
 
@@ -18,7 +19,10 @@ def main():
   concatenate_parser = subs.add_parser('concatenate', help='Concatenate videos')
   concatenate_parser.add_argument('videos',
                            help='Video files',
-                           type=str, widget='MultiFileChooser')
+                           type=str, widget='MultiFileChooser')  
+  concatenate_parser.add_argument('--clip',
+                           help='Clip 1 second from begin and end of each source video. Requires same space in system temp folder.',
+                           action='store_true',  dest = 'clip')
   concatenate_parser.add_argument('filename',
                            help='New file name, withouth exstension',
                            type=str, default = 'joined')
@@ -33,6 +37,33 @@ def main():
     videos_list = VIDEOS.split(";")
     folder = os.path.dirname(videos_list[0])
     video_extension = os.path.splitext(videos_list[0])[1]
+    
+    print args
+    if args.clip:
+        temp_videos = list()
+        for video in videos_list:
+            tf = tempfile.NamedTemporaryFile(delete=False)
+            cmd = 'ffprobe -i "{video}" -show_entries format=duration -v quiet -of csv="p=0"'.format(video=video)
+            #duration = subprocess.check_output(['ffprobe', '-i', video,'-show_entries format=duration -v quiet -of csv="p=0"'])
+            #out = subprocess.Popen(['ffprobe', '-i', video,' -show_entries format=duration -v quiet -of csv="p=0"'], 
+            out = subprocess.Popen(cmd, shell=True,
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.STDOUT)
+            stdout,stderr = out.communicate()
+            duration = float(stdout)
+            #print duration
+            
+            extension = os.path.splitext(video)[1]
+            
+            cmd = 'ffmpeg -ss 00:00:01 -i "{video}" -t {duration} {output}'.format(video=video, output=tf.name+extension,duration=str(duration-2))
+            os.system(cmd)
+            temp_videos.append(tf.name+extension)
+            print cmd
+        videos_list = temp_videos
+        print temp_videos
+    else:
+        pass
+    
     ffmpeg_concatenate_list = r''
     for file in videos_list:
       cmd = "file '"+file+"'\n"
