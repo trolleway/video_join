@@ -9,7 +9,7 @@ running = True
 
 @Gooey(optional_cols=2, program_name="concatenate videos")
 def main():
-  settings_msg = "Concatenate videos in FFMPEG whtiouth re-encoding \n" \
+  settings_msg = "Concatenate videos in FFMPEG whthout re-encoding \n" \
                  'New file will be saved to source folder'
   parser = GooeyParser(description=settings_msg)
   parser.add_argument('--verbose', help='be verbose', dest='verbose',
@@ -23,10 +23,16 @@ def main():
   concatenate_parser.add_argument('--clip',
                            help='Clip 1 second from begin and end of each source video. Requires same space in system temp folder.',
                            action='store_true',  dest = 'clip')
-  concatenate_parser.add_argument('filename',
+  concatenate_parser.add_argument('--filename',
                            help='New file name, withouth exstension',
                            type=str, default = 'joined')
-
+  concatenate_parser.add_argument('--seconds',
+                           help='Trim seconds from each input file',
+                           type=str, default = '1',gooey_options={
+            'validator': {
+                'test': '0 <= int(user_input) <= 14',
+                'message': 'Must be between 0 and 14'
+            }})
                            
 
 
@@ -37,12 +43,14 @@ def main():
     videos_list = VIDEOS.split(";")
     folder = os.path.dirname(videos_list[0])
     video_extension = os.path.splitext(videos_list[0])[1]
+    seconds = args.seconds
     
     print args
     if args.clip:
         temp_videos = list()
         for video in videos_list:
-            tf = tempfile.NamedTemporaryFile(delete=False)
+            extension = os.path.splitext(video)[1]
+            tf = tempfile.NamedTemporaryFile(suffix=extension,delete=False)
             cmd = 'ffprobe -i "{video}" -show_entries format=duration -v quiet -of csv="p=0"'.format(video=video)
             #duration = subprocess.check_output(['ffprobe', '-i', video,'-show_entries format=duration -v quiet -of csv="p=0"'])
             #out = subprocess.Popen(['ffprobe', '-i', video,' -show_entries format=duration -v quiet -of csv="p=0"'], 
@@ -53,9 +61,8 @@ def main():
             duration = float(stdout)
             #print duration
             
-            extension = os.path.splitext(video)[1]
             
-            cmd = 'ffmpeg -ss 00:00:01 -i "{video}" -t {duration} {output}'.format(video=video, output=tf.name+extension,duration=str(duration-2))
+            cmd = 'ffmpeg -ss {seconds} -i "{video}" -t {duration}  {output}'.format(video=video, seconds = seconds, output=tf.name+extension, duration=str(duration-float(seconds)*2))
             os.system(cmd)
             temp_videos.append(tf.name+extension)
             print cmd
