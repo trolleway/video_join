@@ -7,7 +7,7 @@ gui for join videos withouth re-encoding
 ```
 git clone https://github.com/trolleway/video_join.git
 pip install -r requirements.txt
-pip install git+https://github.com/chriskiehl/Gooey.git
+pip install --upgrade --force-reinstall  git+https://github.com/chriskiehl/Gooey.git
 ```
 
 # Usage
