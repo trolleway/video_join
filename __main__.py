@@ -79,7 +79,6 @@ def main():
         video_extension = os.path.splitext(videos_list[0])[1]
         seconds = args.seconds
     
-        print args
         if args.clip:
             temp_videos = list()
             for video in videos_list:
@@ -95,7 +94,6 @@ def main():
                 stderr=subprocess.STDOUT)
                 stdout,stderr = out.communicate()
                 duration = float(stdout)
-                #print duration
                 '''
                 duration = get_video_length(video)
                
@@ -108,9 +106,7 @@ def main():
                     cmd = 'ffmpeg -y -safe 0 -f concat -i {tf} -c copy  -vcodec copy  "{filename}"'.format(tf=video,filename=tf.name+extension)
                 os.system(cmd)
                 temp_videos.append(tf.name+extension)
-                print cmd
             videos_list = temp_videos
-            print temp_videos
         else:
             pass
         
@@ -120,13 +116,12 @@ def main():
           ffmpeg_concatenate_list += cmd
         
         tf = tempfile.NamedTemporaryFile(delete=False)
-        print tf.name
         text_file = open(tf.name, "w")
         text_file.write(ffmpeg_concatenate_list)
         text_file.close()
         
         cmd = 'ffmpeg -y -safe 0 -f concat -i {tf} -c copy  -vcodec copy  "{filename}"'.format(tf=tf.name,filename=os.path.join(folder,FILENAME)+''+video_extension)
-        print cmd
+
         os.system(cmd)
         
         #os.unlink(tf.name)
